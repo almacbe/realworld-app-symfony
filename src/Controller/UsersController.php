@@ -76,7 +76,63 @@ class UsersController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        return $this->json([
+        return $this->json($this->serializeUser($user, $request));
+    }
+
+    /**
+     * @Route("/user", name="update", methods={"PUT"})
+     */
+    public function update(
+        Request $request,
+        UserRepository $userRepository,
+        UserPasswordHasherInterface $userPasswordHasher
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+        $userData = json_decode($request->getContent(), true)['user'];
+
+        // TODO: Validate if email or username are uniques or not.
+
+        $update = false;
+        if (isset($userData['email'])) {
+            $user->setEmail($userData['email']);
+            $update = true;
+        }
+
+        if (isset($userData['username'])) {
+            $user->setUsername($userData['username']);
+            $update = true;
+        }
+
+        if (isset($userData['password'])) {
+            $user->setPassword(
+                $userPasswordHasher->hashPassword(
+                    $user,
+                    $userData['password']
+            ));
+            $update = true;
+        }
+
+        if ($update) {
+            $userRepository->save($user);
+        }
+
+        return $this->json($this->serializeUser($user, $request));
+    }
+
+    private function getTokenFromAuthorizationHeader(Request $request): string
+    {
+        return explode(' ', $request->headers->get('Authorization'))[1];
+    }
+
+    /**
+     * @param User $user
+     * @param Request $request
+     * @return array[]
+     */
+    private function serializeUser(User $user, Request $request): array
+    {
+        return [
             'user' => [
                 'email' => $user->getEmail(),
                 'username' => $user->getUsername(),
@@ -84,27 +140,6 @@ class UsersController extends AbstractController
                 'image' => '',
                 'token' => $this->getTokenFromAuthorizationHeader($request),
             ]
-        ]);
-    }
-
-    /**
-     * @Route("/user", name="update", methods={"PUT"})
-     */
-    public function update(): Response
-    {
-        return $this->json([
-            'user' => [
-                'email' => '',
-                'username' => '',
-                'bio' => '',
-                'image' => '',
-                'token' => '',
-            ]
-        ]);
-    }
-
-    private function getTokenFromAuthorizationHeader(Request $request): string
-    {
-        return explode(' ', $request->headers->get('Authorization'))[1];
+        ];
     }
 }
