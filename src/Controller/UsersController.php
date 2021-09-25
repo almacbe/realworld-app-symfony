@@ -2,8 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class UsersController extends AbstractController
@@ -11,8 +16,25 @@ class UsersController extends AbstractController
     /**
      * @Route("/users", name="register", methods={"POST"})
      */
-    public function register(): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserRepository $userRepository): Response
     {
+        $userData = json_decode($request->getContent(), true)['user'];
+
+        $user = new User();
+        $user
+            ->setUsername($userData['username'])
+            ->setEmail($userData['email'])
+            ->setRoles(['ROLE_USER'])
+            ->setPassword(
+                $userPasswordHasher->hashPassword(
+                    $user,
+                    $userData['password']
+                )
+            )
+        ;
+
+        $userRepository->save($user);
+
         return $this->json([
             'user' => [
                 'email' => '',
