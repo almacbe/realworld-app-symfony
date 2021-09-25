@@ -9,9 +9,57 @@ use Symfony\Component\Routing\Annotation\Route;
 class UsersController extends AbstractController
 {
     /**
-     * @Route("/users", name="user")
+     * @Route("/users", name="register", methods={"POST"})
      */
-    public function index(): Response
+    public function register(): Response
+    {
+        return $this->json([
+            'user' => [
+                'email' => '',
+                'username' => '',
+                'bio' => '',
+                'image' => '',
+                'token' => '',
+            ]
+        ]);
+    }
+
+    /**
+     * @Route("/users/login", name="login", methods={"POST"})
+     */
+    public function login(): Response
+    {
+        return $this->json([
+            'user' => [
+                'email' => '',
+                'username' => '',
+                'bio' => '',
+                'image' => '',
+                'token' => '',
+            ]
+        ]);
+    }
+
+    /**
+     * @Route("/user", name="current_user", methods={"GET"})
+     */
+    public function currentUser(): Response
+    {
+        return $this->json([
+            'user' => [
+                'email' => '',
+                'username' => '',
+                'bio' => '',
+                'image' => '',
+                'token' => '',
+            ]
+        ]);
+    }
+
+    /**
+     * @Route("/user", name="current_user", methods={"PUT"})
+     */
+    public function update(): Response
     {
         return $this->json([
             'user' => [
