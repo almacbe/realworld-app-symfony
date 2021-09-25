@@ -22,6 +22,7 @@ class UsersController extends AbstractController
         UserRepository $userRepository,
         JWTTokenManagerInterface $tokenManager
     ): Response {
+        // TODO: Validate username, email and even password
         $userData = json_decode($request->getContent(), true)['user'];
 
         $user = new User();
@@ -70,21 +71,24 @@ class UsersController extends AbstractController
     /**
      * @Route("/user", name="current_user", methods={"GET"})
      */
-    public function currentUser(): Response
+    public function currentUser(Request $request): Response
     {
+        /** @var User $user */
+        $user = $this->getUser();
+
         return $this->json([
             'user' => [
-                'email' => '',
-                'username' => '',
+                'email' => $user->getEmail(),
+                'username' => $user->getUsername(),
                 'bio' => '',
                 'image' => '',
-                'token' => '',
+                'token' => $this->getTokenFromAuthorizationHeader($request),
             ]
         ]);
     }
 
     /**
-     * @Route("/user", name="current_user", methods={"PUT"})
+     * @Route("/user", name="update", methods={"PUT"})
      */
     public function update(): Response
     {
@@ -97,5 +101,10 @@ class UsersController extends AbstractController
                 'token' => '',
             ]
         ]);
+    }
+
+    private function getTokenFromAuthorizationHeader(Request $request): string
+    {
+        return explode(' ', $request->headers->get('Authorization'))[1];
     }
 }
