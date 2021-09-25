@@ -1,0 +1,13 @@
+{
+    "name": "alfonso/realworld-app-symfony",
+    "description": "RealWorld App in Symfony",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alfonso Machado",
+            "email": "almacbe@gmail.com"
+        }
+    ],
+    "require": {}
+}
