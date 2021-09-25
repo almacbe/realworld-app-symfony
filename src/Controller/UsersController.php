@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
-use Doctrine\ORM\EntityManager;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,8 +16,12 @@ class UsersController extends AbstractController
     /**
      * @Route("/users", name="register", methods={"POST"})
      */
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserRepository $userRepository): Response
-    {
+    public function register(
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        UserRepository $userRepository,
+        JWTTokenManagerInterface $tokenManager
+    ): Response {
         $userData = json_decode($request->getContent(), true)['user'];
 
         $user = new User();
@@ -37,17 +41,17 @@ class UsersController extends AbstractController
 
         return $this->json([
             'user' => [
-                'email' => '',
-                'username' => '',
+                'email' => $user->getEmail(),
+                'username' => $user->getUsername(),
                 'bio' => '',
                 'image' => '',
-                'token' => '',
+                'token' => $tokenManager->create($user),
             ]
         ]);
     }
 
     /**
-     * TODO: Overwrite response of login
+     * TODO: Overwrite resquest & response of login
      * Route("/users/login", name="login", methods={"POST"})
      */
     public function login(): Response
