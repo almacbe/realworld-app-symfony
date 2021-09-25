@@ -6,7 +6,7 @@ use App\Entity\User;
 
 final class UserMother
 {
-    public static function aUser(): User
+    public static function anUser(): User
     {
         $user = new User();
         $user

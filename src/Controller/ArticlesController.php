@@ -16,6 +16,7 @@ class ArticlesController extends AbstractController
      */
     public function create(Request $request, ArticleRepository $articleRepository): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
         $articleData = json_decode($request->getContent(), true)['article'];
 
         $article = new Article();
@@ -47,6 +48,43 @@ class ArticlesController extends AbstractController
                 'favorited' => '',
                 'favoritesCount' => 0,
             ]
+        ]);
+    }
+
+    /**
+     * @Route("/articles", name="get_globaly", methods={"GET"})
+     */
+    public function getGlobally(ArticleRepository $articleRepository)
+    {
+        $articles = $articleRepository->findAll();
+        $serializedArticles = [];
+        foreach ($articles as $article) {
+            $serializedArticles[] = [
+                'slug' => $article->slug(),
+                'title' => $article->getTitle(),
+                'description' => $article->getDescription(),
+                'body' => $article->getBody(),
+            // TODO: handle tags
+                'tagList' => [
+                    'string',
+                ],
+                'createdAt' => $article->createdAt()->format(\DateTimeImmutable::ISO8601),
+                'updatedAt' => $article->updatedAt()->format(DATE_ISO8601),
+                'favorited' => true,
+                'favoritesCount' => 0,
+                'author' => [
+                    'username' => $article->author(),
+                // TODO: handle relationship
+                    'bio' => 'string',
+                    'image' => 'string',
+                    'following' => true,
+                ],
+            ];
+        }
+
+        return $this->json([
+           'articles' => $serializedArticles,
+            'articlesCount' => count($serializedArticles),
         ]);
     }
 }
