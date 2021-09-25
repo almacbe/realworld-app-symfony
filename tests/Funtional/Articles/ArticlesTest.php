@@ -15,8 +15,8 @@ class ArticlesTest extends WebTestCase
     {
         $this->client = static::createClient();
         /** @var UserRepository $repository */
-       $repository = $this->getContainer()->get(UserRepository::class);
-       $repository->save(UserMother::aUser());
+        $repository = $this->getContainer()->get(UserRepository::class);
+        $repository->save(UserMother::aUser());
     }
 
     protected function createAuthenticatedClient($username = 'user@email.com', $password = 'password'): KernelBrowser
@@ -24,13 +24,13 @@ class ArticlesTest extends WebTestCase
         $this->client->request(
             'POST',
             '/api/users/login',
-            array(),
-            array(),
-            array('CONTENT_TYPE' => 'application/json'),
-            json_encode(array(
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode([
                 'username' => $username,
                 'password' => $password,
-            ))
+            ])
         );
 
         $data = json_decode($this->client->getResponse()->getContent(), true);
@@ -44,6 +44,41 @@ class ArticlesTest extends WebTestCase
     public function testCreate()
     {
         $client = $this->createAuthenticatedClient();
-//        $this->client->request('POST', '/api/')
+        $client->request(
+            'POST',
+            '/api/articles',
+            [],
+            [],
+            [],
+            json_encode([
+                'article' => [
+                    'title' => 'title',
+                    'description' => 'description',
+                    'body' => 'body',
+                    'tagList' => [
+                        'tag',
+                    ],
+                ],
+            ])
+        );
+
+        $this->assertResponseIsSuccessful();
+        $this->assertEquals(
+            [
+                'article' => [
+                    'title' => 'title',
+                    'slug' => '/title',
+                    'body' => 'body',
+                    'createdAt' => '2021-01-01T00:01:00+0000',
+                    'updatedAt' => '2021-01-01T00:01:00+0000',
+                    'description' => 'description',
+                    'tagList' => [],
+                    'author' => 'username',
+                    'favorited' => '',
+                    'favoritesCount' => 0,
+                ]
+            ],
+            json_decode($client->getResponse()->getContent(), true)
+        );
     }
 }
