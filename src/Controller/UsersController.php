@@ -25,7 +25,8 @@ class UsersController extends AbstractController
     }
 
     /**
-     * @Route("/users/login", name="login", methods={"POST"})
+     * TODO: Overwrite response of login
+     * Route("/users/login", name="login", methods={"POST"})
      */
     public function login(): Response
     {
